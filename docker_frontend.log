@@ -1,0 +1,104 @@
+time="2026-04-04T14:18:15+05:30" level=warning msg="C:\\Users\\Lenovo\\OneDrive\\Desktop\\DevopsProject\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image devopsproject-frontend Building 
+ Image devopsproject-backend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.13kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 298B 0.0s done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/nginx:alpine
+#3 ...
+
+#4 [internal] load metadata for docker.io/library/node:22-alpine
+#4 DONE 1.7s
+
+#3 [internal] load metadata for docker.io/library/nginx:alpine
+#3 DONE 1.7s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 0.0s
+#5 transferring context: 2B 0.1s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [builder 1/6] FROM docker.io/library/node:22-alpine@sha256:4d64b49e6c891c8fc821007cb1cdc6c0db7773110ac2c34bf2e6960adef62ed3
+#7 resolve docker.io/library/node:22-alpine@sha256:4d64b49e6c891c8fc821007cb1cdc6c0db7773110ac2c34bf2e6960adef62ed3 0.1s done
+#7 DONE 0.1s
+
+#8 [stage-1 1/2] FROM docker.io/library/nginx:alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1
+#8 resolve docker.io/library/nginx:alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1
+#8 resolve docker.io/library/nginx:alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1 0.1s done
+#8 CACHED
+
+#9 [builder 2/6] WORKDIR /app
+#9 CACHED
+
+#6 [internal] load build context
+#6 transferring context: 567.77kB 1.4s done
+#6 DONE 1.4s
+
+#10 [builder 3/6] COPY package*.json ./
+#10 DONE 0.1s
+
+#11 [builder 4/6] RUN npm install
+#11 15.68 
+#11 15.68 added 185 packages, and audited 186 packages in 15s
+#11 15.68 
+#11 15.68 43 packages are looking for funding
+#11 15.68   run `npm fund` for details
+#11 15.71 
+#11 15.71 2 moderate severity vulnerabilities
+#11 15.71 
+#11 15.71 To address all issues, run:
+#11 15.71   npm audit fix
+#11 15.71 
+#11 15.71 Run `npm audit` for details.
+#11 15.71 npm notice
+#11 15.71 npm notice New major version of npm available! 10.9.7 -> 11.12.1
+#11 15.71 npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.12.1
+#11 15.71 npm notice To update run: npm install -g npm@11.12.1
+#11 15.71 npm notice
+#11 DONE 16.7s
+
+#12 [builder 5/6] COPY . .
+#12 DONE 4.8s
+
+#13 [builder 6/6] RUN npm run build
+#13 0.859 
+#13 0.859 > frontend@0.0.0 build
+#13 0.859 > vite build
+#13 0.859 
+#13 1.612 vite v8.0.3 building client environment for production...
+#13 1.657 [2Ktransforming...✓ 83 modules transformed.
+#13 2.069 rendering chunks...
+#13 2.235 computing gzip size...
+#13 2.251 dist/index.html                   0.45 kB │ gzip:   0.29 kB
+#13 2.251 dist/assets/index-CiC0GK8p.css    3.97 kB │ gzip:   1.44 kB
+#13 2.251 dist/assets/index-CfG1Xc19.js   308.71 kB │ gzip: 100.89 kB
+#13 2.251 
+#13 2.253 ✓ built in 636ms
+#13 DONE 2.4s
+
+#14 [stage-1 2/2] COPY --from=builder /app/dist /usr/share/nginx/html
+#14 DONE 0.1s
+
+#15 exporting to image
+#15 exporting layers
+#15 exporting layers 0.3s done
+#15 exporting manifest sha256:2812caaf8873d30262bbbfc15c2a5fd11661c3d7726e6749b52e6f0ecb955ab3 0.0s done
+#15 exporting config sha256:6c4b8f238a988dd0396215cb36adc93cc47793ecc422312d628846b23944b3fb 0.1s done
+#15 exporting attestation manifest sha256:b65bd6a7e7eb02c0ecfe0bab9e56d3017799c5a995ea2e48cbd46dc212413b8b 0.1s done
+#15 exporting manifest list sha256:732b6f1ca00d1bac11097a6c317cfe26db8b6f5affb3760a7d6e5007ff3e0329
+#15 exporting manifest list sha256:732b6f1ca00d1bac11097a6c317cfe26db8b6f5affb3760a7d6e5007ff3e0329 0.0s done
+#15 naming to docker.io/library/devopsproject-frontend:latest done
+#15 unpacking to docker.io/library/devopsproject-frontend:latest 0.1s done
+#15 DONE 0.7s
+
+#16 resolving provenance for metadata file
+#16 DONE 0.1s
+ Image devopsproject-frontend Built 

@@ -1,0 +1,206 @@
+time="2026-04-04T14:19:39+05:30" level=warning msg="C:\\Users\\Lenovo\\OneDrive\\Desktop\\DevopsProject\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image devopsproject-backend Building 
+ Image devopsproject-frontend Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.10kB done
+#1 DONE 0.0s
+
+#2 [frontend internal] load build definition from Dockerfile
+#2 transferring dockerfile: 298B 0.0s done
+#2 DONE 0.1s
+
+#3 [backend internal] load build definition from Dockerfile
+#3 transferring dockerfile: 364B 0.0s done
+#3 DONE 0.1s
+
+#4 [auth] library/maven:pull token for registry-1.docker.io
+#4 DONE 0.0s
+
+#5 [auth] library/nginx:pull token for registry-1.docker.io
+#5 DONE 0.0s
+
+#6 [auth] library/node:pull token for registry-1.docker.io
+#6 DONE 0.0s
+
+#7 [auth] library/eclipse-temurin:pull token for registry-1.docker.io
+#7 DONE 0.0s
+
+#8 [backend internal] load metadata for docker.io/library/eclipse-temurin:17-jdk-jammy
+#8 ...
+
+#9 [frontend internal] load metadata for docker.io/library/node:22-alpine
+#9 DONE 2.1s
+
+#10 [frontend internal] load metadata for docker.io/library/nginx:alpine
+#10 DONE 2.1s
+
+#11 [backend internal] load metadata for docker.io/library/maven:3.9.6-eclipse-temurin-17
+#11 DONE 2.1s
+
+#12 [frontend internal] load .dockerignore
+#12 transferring context: 0.2s
+#12 transferring context: 2B 0.2s done
+#12 DONE 0.3s
+
+#8 [backend internal] load metadata for docker.io/library/eclipse-temurin:17-jdk-jammy
+#8 DONE 2.4s
+
+#13 [backend internal] load .dockerignore
+#13 transferring context: 2B 0.0s done
+#13 DONE 0.0s
+
+#14 [backend internal] load build context
+#14 DONE 0.0s
+
+#15 [frontend stage-1 1/2] FROM docker.io/library/nginx:alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1
+#15 resolve docker.io/library/nginx:alpine@sha256:e7257f1ef28ba17cf7c248cb8ccf6f0c6e0228ab9c315c152f9c203cd34cf6d1 0.1s done
+#15 DONE 0.1s
+
+#16 [frontend builder 1/6] FROM docker.io/library/node:22-alpine@sha256:4d64b49e6c891c8fc821007cb1cdc6c0db7773110ac2c34bf2e6960adef62ed3
+#16 resolve docker.io/library/node:22-alpine@sha256:4d64b49e6c891c8fc821007cb1cdc6c0db7773110ac2c34bf2e6960adef62ed3 0.1s done
+#16 DONE 0.1s
+
+#17 [backend stage-1 1/3] FROM docker.io/library/eclipse-temurin:17-jdk-jammy@sha256:ef5f72c89f9d7532046e6779cae0ee84f72484011c6664aa6e0115f0884fe6ea
+#17 resolve docker.io/library/eclipse-temurin:17-jdk-jammy@sha256:ef5f72c89f9d7532046e6779cae0ee84f72484011c6664aa6e0115f0884fe6ea
+#17 resolve docker.io/library/eclipse-temurin:17-jdk-jammy@sha256:ef5f72c89f9d7532046e6779cae0ee84f72484011c6664aa6e0115f0884fe6ea 0.1s done
+#17 DONE 0.1s
+
+#18 [backend builder 1/6] FROM docker.io/library/maven:3.9.6-eclipse-temurin-17@sha256:29a1658b1f3078e07c2b17f7b519b45eb47f65d9628e887eac45a8c5c8f939d4
+#18 resolve docker.io/library/maven:3.9.6-eclipse-temurin-17@sha256:29a1658b1f3078e07c2b17f7b519b45eb47f65d9628e887eac45a8c5c8f939d4 0.1s done
+#18 DONE 0.1s
+
+#19 [backend stage-1 2/3] WORKDIR /app
+#19 CACHED
+
+#14 [backend internal] load build context
+#14 transferring context: 7.55kB 0.0s done
+#14 DONE 0.1s
+
+#20 [frontend internal] load build context
+#20 ...
+
+#21 [backend builder 3/6] COPY pom.xml .
+#21 CACHED
+
+#22 [backend builder 2/6] WORKDIR /app
+#22 CACHED
+
+#23 [backend builder 4/6] RUN mvn dependency:go-offline
+#23 CACHED
+
+#24 [backend builder 5/6] COPY src ./src
+#24 DONE 0.1s
+
+#20 [frontend internal] load build context
+#20 transferring context: 567.77kB 1.5s done
+#20 DONE 1.6s
+
+#25 [backend builder 6/6] RUN mvn package -DskipTests
+#25 ...
+
+#26 [frontend builder 2/6] WORKDIR /app
+#26 CACHED
+
+#27 [frontend builder 5/6] COPY . .
+#27 CACHED
+
+#28 [frontend builder 6/6] RUN npm run build
+#28 CACHED
+
+#29 [frontend builder 3/6] COPY package*.json ./
+#29 CACHED
+
+#30 [frontend builder 4/6] RUN npm install
+#30 CACHED
+
+#31 [frontend stage-1 2/2] COPY --from=builder /app/dist /usr/share/nginx/html
+#31 CACHED
+
+#32 [frontend] exporting to image
+#32 exporting layers done
+#32 exporting manifest sha256:2812caaf8873d30262bbbfc15c2a5fd11661c3d7726e6749b52e6f0ecb955ab3 done
+#32 exporting config sha256:6c4b8f238a988dd0396215cb36adc93cc47793ecc422312d628846b23944b3fb done
+#32 exporting attestation manifest sha256:48358348a145c9962efbe3129e903302d7e11dbee4cef0f9fe2457b194121f99 0.1s done
+#32 exporting manifest list sha256:16d940354fb778377439ca045d6a2c13e8c1ea281f1a3983d69294af827b1848 0.0s done
+#32 naming to docker.io/library/devopsproject-frontend:latest done
+#32 unpacking to docker.io/library/devopsproject-frontend:latest 0.0s done
+#32 DONE 0.2s
+
+#25 [backend builder 6/6] RUN mvn package -DskipTests
+#25 ...
+
+#33 [frontend] resolving provenance for metadata file
+#33 DONE 0.6s
+
+#25 [backend builder 6/6] RUN mvn package -DskipTests
+#25 3.694 [INFO] Scanning for projects...
+#25 4.225 [INFO] 
+#25 4.225 [INFO] ----------------------< com.aicodementor:backend >----------------------
+#25 4.225 [INFO] Building backend 0.0.1-SNAPSHOT
+#25 4.225 [INFO]   from pom.xml
+#25 4.226 [INFO] --------------------------------[ jar ]---------------------------------
+#25 5.366 [INFO] 
+#25 5.366 [INFO] --- resources:3.3.1:resources (default-resources) @ backend ---
+#25 5.574 [INFO] Copying 1 resource from src/main/resources to target/classes
+#25 5.654 [INFO] Copying 0 resource from src/main/resources to target/classes
+#25 5.656 [INFO] 
+#25 5.657 [INFO] --- compiler:3.14.1:compile (default-compile) @ backend ---
+#25 5.866 [INFO] Recompiling the module because of changed source code.
+#25 5.886 [INFO] Compiling 8 source files with javac [debug parameters release 17] to target/classes
+#25 8.653 [INFO] /app/src/main/java/com/aicodementor/service/PistonExecutionService.java: Some input files use unchecked or unsafe operations.
+#25 8.653 [INFO] /app/src/main/java/com/aicodementor/service/PistonExecutionService.java: Recompile with -Xlint:unchecked for details.
+#25 8.654 [INFO] 
+#25 8.654 [INFO] --- resources:3.3.1:testResources (default-testResources) @ backend ---
+#25 8.664 [INFO] skip non existing resourceDirectory /app/src/test/resources
+#25 8.665 [INFO] 
+#25 8.665 [INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ backend ---
+#25 8.686 [INFO] Recompiling the module because of changed dependency.
+#25 8.688 [INFO] Compiling 1 source file with javac [debug parameters release 17] to target/test-classes
+#25 9.347 [INFO] 
+#25 9.347 [INFO] --- surefire:3.5.5:test (default-test) @ backend ---
+#25 9.584 [INFO] Tests are skipped.
+#25 9.584 [INFO] 
+#25 9.584 [INFO] --- jar:3.4.2:jar (default-jar) @ backend ---
+#25 10.07 [INFO] Building jar: /app/target/backend-0.0.1-SNAPSHOT.jar
+#25 10.17 [INFO] 
+#25 10.17 [INFO] --- spring-boot:4.0.5:repackage (repackage) @ backend ---
+#25 11.98 [INFO] Replacing main artifact /app/target/backend-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+#25 11.98 [INFO] The original artifact has been renamed to /app/target/backend-0.0.1-SNAPSHOT.jar.original
+#25 11.98 [INFO] ------------------------------------------------------------------------
+#25 11.98 [INFO] BUILD SUCCESS
+#25 11.98 [INFO] ------------------------------------------------------------------------
+#25 11.99 [INFO] Total time:  8.360 s
+#25 11.99 [INFO] Finished at: 2026-04-04T08:49:53Z
+#25 11.99 [INFO] ------------------------------------------------------------------------
+#25 DONE 12.1s
+
+#34 [backend stage-1 3/3] COPY --from=builder /app/target/*.jar app.jar
+#34 DONE 0.5s
+
+#35 [backend] exporting to image
+#35 exporting layers
+#35 exporting layers 1.5s done
+#35 exporting manifest sha256:17c83fd6b9badee88de766e1a3098a3e9157ff62c7eb7ef07c58b92e3a4bf5c2 0.0s done
+#35 exporting config sha256:01bf7404bef726ab12e4f75439f394a58712be7849d7e8cfa3a290dd81bc1d7f 0.1s done
+#35 exporting attestation manifest sha256:c76790c0ea5bd213bf6686fb50ea85cf91561a5c347ea3a63134c388f3581a21 0.1s done
+#35 exporting manifest list sha256:36c35db31ce9b145358ab514d51ac7beaf2939795188fdb01f82d834e3725ab0
+#35 exporting manifest list sha256:36c35db31ce9b145358ab514d51ac7beaf2939795188fdb01f82d834e3725ab0 0.0s done
+#35 naming to docker.io/library/devopsproject-backend:latest done
+#35 unpacking to docker.io/library/devopsproject-backend:latest
+#35 unpacking to docker.io/library/devopsproject-backend:latest 0.6s done
+#35 DONE 2.5s
+
+#36 [backend] resolving provenance for metadata file
+#36 DONE 0.2s
+ Image devopsproject-backend Built 
+ Image devopsproject-frontend Built 
+ Network devopsproject_default Creating 
+ Network devopsproject_default Created 
+ Container devopsproject-backend-1 Creating 
+ Container devopsproject-backend-1 Created 
+ Container devopsproject-frontend-1 Creating 
+ Container devopsproject-frontend-1 Created 
+ Container devopsproject-backend-1 Starting 
+ Container devopsproject-backend-1 Started 
+ Container devopsproject-frontend-1 Starting 
+ Container devopsproject-frontend-1 Started 
