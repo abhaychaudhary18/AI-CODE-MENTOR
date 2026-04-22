@@ -1,0 +1,1 @@
+fetch('https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyDsA-YeAzypj44FGRHLQk66je8HE6od-ZA').then(r => r.json()).then(d => { if(d.error) { console.error('ERROR:', d.error.message); } else { console.log('SUCCESS, models array length:', d.models.length); } }).catch(console.error);

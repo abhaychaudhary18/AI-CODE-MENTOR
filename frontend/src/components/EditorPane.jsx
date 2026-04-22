@@ -1,7 +1,7 @@
 import React from 'react';
 import Editor from '@monaco-editor/react';
 
-const EditorPane = ({ language, code, onChange }) => {
+const EditorPane = ({ language, code, onChange, onCursorChange }) => {
     
     // Map languages to monaco editor identifiers
     const langMap = {
@@ -12,8 +12,17 @@ const EditorPane = ({ language, code, onChange }) => {
         javascript: 'javascript'
     };
 
+    const handleEditorDidMount = (editor, monaco) => {
+        editor.onDidChangeCursorPosition((e) => {
+            if (onCursorChange) {
+                onCursorChange({ line: e.position.lineNumber, column: e.position.column });
+            }
+        });
+    };
+
     return (
         <Editor
+            onMount={handleEditorDidMount}
             height="100%"
             language={langMap[language] || 'javascript'}
             value={code}

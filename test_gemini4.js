@@ -1,0 +1,1 @@
+fetch('https://generativelanguage.googleapis.com/v1beta/models?key=AIzaSyDsA-YeAzypj44FGRHLQk66je8HE6od-ZA').then(r => r.json()).then(d => d.models.map(m=>m.name).forEach(n => console.log(n))).catch(console.error);

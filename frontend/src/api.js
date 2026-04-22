@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
-export const executeCode = async (language, code) => {
+export const executeCode = async (language, code, stdin) => {
     try {
-        const response = await axios.post(`${API_BASE_URL}/execute`, { language, code });
+        const response = await axios.post(`${API_BASE_URL}/execute`, { language, code, stdin });
         return response.data;
     } catch (error) {
         if (error.response && error.response.data) {
@@ -25,9 +25,12 @@ export const explainCode = async (language, code, output, errorMsg) => {
             code, 
             output, 
             error: errorMsg 
-        });
+        }, { timeout: 15000 });
         return response.data.explanation;
     } catch (error) {
+        if (error.code === 'ECONNABORTED') {
+            return "⚠️ **AI Service Timeout**\n\nThe AI Mentor took too long to respond. Google's model may be experiencing high demand.\n\n> Please click **Run Code** again to retry.";
+        }
         return "Failed to connect to AI Mentor service.";
     }
 };

@@ -6,4 +6,5 @@ import lombok.Data;
 public class ExecutionRequest {
     private String language;
     private String code;
+    private String stdin;
 }

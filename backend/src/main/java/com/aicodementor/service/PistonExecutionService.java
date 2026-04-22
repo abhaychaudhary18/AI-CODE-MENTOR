@@ -26,6 +26,10 @@ public class PistonExecutionService {
     }
 
     public Mono<ExecutionResponse> execute(ExecutionRequest request) {
+        if ("python".equals(request.getLanguage())) {
+            return executePythonLocally(request);
+        }
+
         String wandboxUrl = "https://wandbox.org/api/compile.json";
         
         Map<String, String> compilerMap = new HashMap<>();
@@ -40,6 +44,9 @@ public class PistonExecutionService {
         Map<String, Object> body = new HashMap<>();
         body.put("compiler", compiler);
         body.put("code", request.getCode());
+        if (request.getStdin() != null && !request.getStdin().isEmpty()) {
+            body.put("stdin", request.getStdin());
+        }
 
         return webClient.post()
                 .uri(wandboxUrl)
@@ -76,5 +83,41 @@ public class PistonExecutionService {
                     response.setError(e.getMessage());
                     return Mono.just(response);
                 });
+    }
+
+    private Mono<ExecutionResponse> executePythonLocally(ExecutionRequest request) {
+        return Mono.fromCallable(() -> {
+            ExecutionResponse response = new ExecutionResponse();
+            try {
+                java.nio.file.Path tempScript = java.nio.file.Files.createTempFile("script", ".py");
+                String finalCode = "import os\nimport sys\ntry:\n    import matplotlib\n    matplotlib.use('Agg')\nexcept:\n    pass\n" + request.getCode();
+                java.nio.file.Files.writeString(tempScript, finalCode);
+                
+                ProcessBuilder pb = new ProcessBuilder("python3", tempScript.toAbsolutePath().toString());
+                pb.directory(new java.io.File(System.getProperty("java.io.tmpdir")));
+                Process process = pb.start();
+                
+                if (request.getStdin() != null && !request.getStdin().isEmpty()) {
+                    java.io.OutputStream os = process.getOutputStream();
+                    os.write(request.getStdin().getBytes());
+                    os.flush();
+                    os.close();
+                }
+                
+                String output = new String(process.getInputStream().readAllBytes());
+                String error = new String(process.getErrorStream().readAllBytes());
+                int exitCode = process.waitFor();
+                
+                response.setIsError(exitCode != 0 || !error.isEmpty());
+                response.setOutput(output);
+                response.setError(error);
+                
+                java.nio.file.Files.deleteIfExists(tempScript);
+            } catch (Exception e) {
+                response.setIsError(true);
+                response.setError("Local Python Execution Failed: " + e.getMessage());
+            }
+            return response;
+        });
     }
 }
