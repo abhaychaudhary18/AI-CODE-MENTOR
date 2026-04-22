@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: ai-code-mentor-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: GEMINI_API_KEY
+        sync: false # Must be set manually in Render dashboard
+
+  - type: web
+    name: ai-code-mentor-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    rootDir: frontend
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: ai-code-mentor-backend
+          envVarKey: RENDER_EXTERNAL_URL
+        # In Render, this dynamically injects the backend URL into the Vite build. We append /api below.
