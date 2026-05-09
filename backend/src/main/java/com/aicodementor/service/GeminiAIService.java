@@ -39,15 +39,21 @@ public class GeminiAIService {
         if (error != null && !error.trim().isEmpty()) {
             promptBuilder.append(String.format(
                 "The code failed with this error:\n```\n%s\n```\n" +
-                "Please rigorously use standard Markdown formatting (such as headings, bullet points, and code blocks) " +
-                "to thoroughly explain why this error occurred. You MUST include a distinct section titled " +
-                "\"### Suggested Fix\" containing the corrected version of the code.", error));
+                "Please rigorously use standard Markdown formatting. You MUST provide your response structured EXACTLY with these four headers:\n" +
+                "### Code Explanation\n" +
+                "### Error Analysis\n" +
+                "### Suggested Fix\n" +
+                "### Complexity Analysis\n\n" +
+                "Ensure every section is populated concisely.", error));
         } else {
             promptBuilder.append(String.format(
                 "The code executed successfully with the following Output:\n```\n%s\n```\n" +
-                "Please rigorously use standard Markdown formatting (such as headings and bullet points) to provide " +
-                "a clear explanation of what the code does, comment on its time complexity, and suggest any ways " +
-                "to optimize or improve it.", output));
+                "Please rigorously use standard Markdown formatting. You MUST provide your response structured EXACTLY with these four headers:\n" +
+                "### Code Explanation\n" +
+                "### Error Analysis\n" +
+                "### Suggested Fix\n" +
+                "### Complexity Analysis\n\n" +
+                "Since there is no error, you can put 'No errors detected.' under Error Analysis and Suggested Fix, or suggest optimizations.", output));
         }
 
         try {

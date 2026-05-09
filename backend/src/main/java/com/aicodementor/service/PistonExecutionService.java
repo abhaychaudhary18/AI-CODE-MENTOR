@@ -18,7 +18,7 @@ public class PistonExecutionService {
 
     private final WebClient webClient;
 
-    @Value("${piston.api.url}")
+    @Value("${piston.api.url:https://emkc.org/api/v2/piston/execute}")
     private String pistonApiUrl;
 
     public PistonExecutionService(WebClient.Builder webClientBuilder) {
@@ -26,30 +26,31 @@ public class PistonExecutionService {
     }
 
     public Mono<ExecutionResponse> execute(ExecutionRequest request) {
-        if ("python".equals(request.getLanguage())) {
-            return executePythonLocally(request);
+        String lang = request.getLanguage().toLowerCase();
+        
+        // Handle languages that do not require backend execution
+        if ("html".equals(lang) || "css".equals(lang)) {
+            ExecutionResponse response = new ExecutionResponse();
+            response.setIsError(false);
+            response.setOutput(lang.toUpperCase() + " does not require backend execution. View your rendered code in the browser.");
+            response.setError("");
+            return Mono.just(response);
         }
 
-        String wandboxUrl = "https://wandbox.org/api/compile.json";
-        
-        Map<String, String> compilerMap = new HashMap<>();
-        compilerMap.put("python", "cpython-3.13.8");
-        compilerMap.put("javascript", "nodejs-20.17.0");
-        compilerMap.put("java", "openjdk-jdk-22+36");
-        compilerMap.put("c", "gcc-13.2.0-c");
-        compilerMap.put("cpp", "gcc-13.2.0");
-
-        String compiler = compilerMap.getOrDefault(request.getLanguage(), "cpython-3.13.8");
-
         Map<String, Object> body = new HashMap<>();
-        body.put("compiler", compiler);
-        body.put("code", request.getCode());
+        body.put("language", lang);
+        body.put("version", "*");
+        
+        Map<String, String> fileMap = new HashMap<>();
+        fileMap.put("content", request.getCode());
+        body.put("files", List.of(fileMap));
+        
         if (request.getStdin() != null && !request.getStdin().isEmpty()) {
             body.put("stdin", request.getStdin());
         }
 
         return webClient.post()
-                .uri(wandboxUrl)
+                .uri(pistonApiUrl)
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(String.class)
@@ -58,66 +59,44 @@ public class PistonExecutionService {
                     try {
                         JsonParser parser = JsonParserFactory.getJsonParser();
                         Map<String, Object> resultMap = parser.parseMap(responseJson);
-                        String programMessage = resultMap.get("program_message") != null ? resultMap.get("program_message").toString() : "";
-                        String compilerMessage = resultMap.get("compiler_message") != null ? resultMap.get("compiler_message").toString() : "";
-                        String compilerError = resultMap.get("compiler_error") != null ? resultMap.get("compiler_error").toString() : "";
-                        String programError = resultMap.get("program_error") != null ? resultMap.get("program_error").toString() : "";
                         
-                        String statusStr = resultMap.get("status") != null ? resultMap.get("status").toString() : "0";
-                        boolean isError = !statusStr.equals("0") || !compilerError.isEmpty() || !programError.isEmpty();
+                        Map<String, Object> runMap = (Map<String, Object>) resultMap.get("run");
+                        Map<String, Object> compileMap = (Map<String, Object>) resultMap.get("compile");
                         
-                        String combinedError = !compilerError.isEmpty() ? compilerError : programError;
-                        String combinedOutput = !programMessage.isEmpty() ? programMessage : compilerMessage;
+                        String output = "";
+                        String error = "";
+                        boolean isError = false;
+
+                        if (compileMap != null && compileMap.get("code") != null && !compileMap.get("code").toString().equals("0")) {
+                            error = compileMap.get("stderr") != null ? compileMap.get("stderr").toString() : "";
+                            output = compileMap.get("stdout") != null ? compileMap.get("stdout").toString() : "";
+                            isError = true;
+                        } else if (runMap != null) {
+                            error = runMap.get("stderr") != null ? runMap.get("stderr").toString() : "";
+                            output = runMap.get("output") != null ? runMap.get("output").toString() : "";
+                            if (runMap.get("code") != null && !runMap.get("code").toString().equals("0")) {
+                                isError = true;
+                            }
+                        }
                         
-                        response.setIsError(isError);
-                        response.setOutput(combinedOutput);
-                        response.setError(combinedError);
+                        if (!error.isEmpty() && isError) {
+                            response.setIsError(true);
+                        } else {
+                            response.setIsError(false);
+                        }
+                        
+                        response.setOutput(output);
+                        response.setError(error);
                     } catch (Exception e) {
                         response.setIsError(true);
-                        response.setError(e.getMessage());
+                        response.setError("Failed to parse execution result: " + e.getMessage());
                     }
                     return response;
                 }).onErrorResume(e -> {
                     ExecutionResponse response = new ExecutionResponse();
                     response.setIsError(true);
-                    response.setError(e.getMessage());
+                    response.setError("Execution service error: " + e.getMessage());
                     return Mono.just(response);
                 });
-    }
-
-    private Mono<ExecutionResponse> executePythonLocally(ExecutionRequest request) {
-        return Mono.fromCallable(() -> {
-            ExecutionResponse response = new ExecutionResponse();
-            try {
-                java.nio.file.Path tempScript = java.nio.file.Files.createTempFile("script", ".py");
-                String finalCode = "import os\nimport sys\ntry:\n    import matplotlib\n    matplotlib.use('Agg')\nexcept:\n    pass\n" + request.getCode();
-                java.nio.file.Files.writeString(tempScript, finalCode);
-                
-                ProcessBuilder pb = new ProcessBuilder("python3", tempScript.toAbsolutePath().toString());
-                pb.directory(new java.io.File(System.getProperty("java.io.tmpdir")));
-                Process process = pb.start();
-                
-                if (request.getStdin() != null && !request.getStdin().isEmpty()) {
-                    java.io.OutputStream os = process.getOutputStream();
-                    os.write(request.getStdin().getBytes());
-                    os.flush();
-                    os.close();
-                }
-                
-                String output = new String(process.getInputStream().readAllBytes());
-                String error = new String(process.getErrorStream().readAllBytes());
-                int exitCode = process.waitFor();
-                
-                response.setIsError(exitCode != 0 || !error.isEmpty());
-                response.setOutput(output);
-                response.setError(error);
-                
-                java.nio.file.Files.deleteIfExists(tempScript);
-            } catch (Exception e) {
-                response.setIsError(true);
-                response.setError("Local Python Execution Failed: " + e.getMessage());
-            }
-            return response;
-        });
     }
 }

@@ -4,15 +4,79 @@ services:
   backend:
     build: ./backend
     ports:
-      - "8081:8080"
+      - "8082:8080"
     environment:
       - SERVER_PORT=8080
-      - PISTON_API_URL=https://emkc.org/api/v2/piston/execute
-      - GEMINI_API_KEY=${GEMINI_API_KEY:-ENTER_YOUR_API_KEY_HERE}
+      - PISTON_API_URL=${PISTON_API_URL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/aicodementor
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      piston:
+        condition: service_healthy
+    networks:
+      - app-network
 
   frontend:
     build: ./frontend
     ports:
-      - "5173:80"
+      - "5175:80"
     depends_on:
       - backend
+    networks:
+      - app-network
+
+  mongodb:
+    image: mongo:latest
+    volumes:
+      - mongodb_data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - app-network
+
+  piston:
+    image: ghcr.io/engineer-man/piston
+    ports:
+      - "2000:2000"
+    volumes:
+      - piston_packages:/piston/packages
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:2000/api/v2/runtimes"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  init-piston:
+    image: curlimages/curl:latest
+    depends_on:
+      piston:
+        condition: service_healthy
+    networks:
+      - app-network
+    command: >
+      sh -c "
+        echo 'Installing languages on Piston...';
+        curl -X POST http://piston:2000/api/v2/packages -H 'Content-Type: application/json' -d '{\"language\":\"python\"}';
+        curl -X POST http://piston:2000/api/v2/packages -H 'Content-Type: application/json' -d '{\"language\":\"javascript\"}';
+        curl -X POST http://piston:2000/api/v2/packages -H 'Content-Type: application/json' -d '{\"language\":\"java\"}';
+        curl -X POST http://piston:2000/api/v2/packages -H 'Content-Type: application/json' -d '{\"language\":\"c++\"}';
+        curl -X POST http://piston:2000/api/v2/packages -H 'Content-Type: application/json' -d '{\"language\":\"c\"}';
+        echo 'Language setup complete.';
+      "
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  piston_packages:
