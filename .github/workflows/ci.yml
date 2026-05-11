@@ -1,67 +1,83 @@
+# Single CI workflow for AI Code Mentor
+# Repo: https://github.com/abhaychaudhary18/AI-CODE-MENTOR
+#
+# Remove any legacy duplicates on GitHub if they still appear under Actions:
+#   ci_cd.yml, ci-cd.yml (keep only this ci.yml)
+#
+# Optional Actions secret: GEMINI_API_KEY (for Compose env in Docker job only)
+
 name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main, master]
   pull_request:
-    branches: [ "main" ]
+    branches: [main, master]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
-  build-backend:
+  frontend:
+    name: Frontend — lint & build
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    - name: Build with Maven
-      working-directory: ./backend
-      run: mvn clean package -DskipTests
-    
-    - name: Build Docker image (Backend)
-      run: docker build -t ai-code-mentor-backend ./backend
+      - uses: actions/checkout@v4
 
-  build-frontend:
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Production build
+        run: npm run build
+
+  backend:
+    name: Backend — Maven verify
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '22'
-    
-    - name: Install dependencies and build
-      working-directory: ./frontend
-      run: |
-        npm install
-        npm run build
-    
-    - name: Build Docker image (Frontend)
-      run: docker build -t ai-code-mentor-frontend ./frontend
+      - uses: actions/checkout@v4
 
-  docker-compose-test:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: maven
+
+      - name: Compile, test, package
+        run: mvn -B verify
+
+  docker:
+    name: Docker — Compose config & image build
     runs-on: ubuntu-latest
-    needs: [build-backend, build-frontend]
+    needs: [frontend, backend]
+    env:
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Start services with Docker Compose
-      env:
-        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      run: |
-        docker compose up --build -d
-        sleep 30
-    
-    - name: Health check Backend
-      run: |
-        curl -f http://localhost:8081/api/execute \
-          -H "Content-Type: application/json" \
-          -d '{"language":"python","code":"print(1)","stdin":""}' || echo "Backend check done"
+      - uses: actions/checkout@v4
 
-    - name: Tear down
-      run: docker compose down
+      - name: Validate Compose file
+        run: docker compose config
+
+      - name: Build images
+        run: docker compose build

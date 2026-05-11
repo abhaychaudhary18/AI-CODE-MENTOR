@@ -14,6 +14,22 @@ An intelligent code execution and debugging platform with modern DevOps integrat
 
 ---
 
+## Run the project from GitHub (for demos / grading)
+
+**GitHub Actions** (`.github/workflows/ci.yml`) **builds and tests** the project in CI. It does **not** host a live app you can share as a normal website.
+
+To run the full app **from the repository in a browser**, use **[GitHub Codespaces](https://docs.github.com/codespaces/overview)** (cloud VS Code + this repo):
+
+1. Open the repo on GitHub: [abhaychaudhary18/AI-CODE-MENTOR](https://github.com/abhaychaudhary18/AI-CODE-MENTOR).
+2. Click **Code** → tab **Codespaces** → **Create codespace on main**. Wait for the dev container to finish (first run can take several minutes).
+3. In the codespace: **Terminal** → **Run Task…** → choose **Run full stack (backend + frontend)** (or press **Ctrl+Shift+B** / **Cmd+Shift+B** for the default build task).
+4. When GitHub shows a toast for port **5173**, click **Open in browser** (or use the **Ports** tab → port **5173** → globe icon). The UI is a `*.github.dev` preview URL.
+5. **AI mentorship (Gemini):** add a [Codespaces user secret](https://docs.github.com/codespaces/managing-your-codespaces/managing-encrypted-secrets-for-your-codespaces) named `GEMINI_API_KEY`, or create a `.env` file at the **repo root inside the codespace** with `GEMINI_API_KEY=your_key`. Without a key, execution still works; AI hints use the backend’s “missing key” message.
+
+The dev container installs Java 17, Maven, Node 22, Python 3, and GCC/G++ so local code execution in the backend matches a typical Linux environment.
+
+---
+
 ## DevOps Architecture
 
 The application is deployed using a robust, multi-container Docker Compose architecture:
@@ -26,7 +42,7 @@ The application is deployed using a robust, multi-container Docker Compose archi
 All components communicate over an isolated internal `bridge` network (`app-network`). NGINX handles reverse-proxying frontend `/api/` calls seamlessly to the backend.
 
 ### GitHub Actions CI/CD Flow
-The repository features an automated CI/CD pipeline (`.github/workflows/ci-cd.yml`) that triggers on pushes and pull requests to the `main` branch. 
+The repository features an automated CI/CD pipeline (`.github/workflows/ci.yml`) that triggers on pushes and pull requests to the `main` branch. 
 It performs:
 1. NPM frontend build validation.
 2. Maven backend compilation and test execution.

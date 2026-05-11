@@ -1,0 +1,41 @@
+{
+  "name": "AI Code Mentor",
+  "image": "mcr.microsoft.com/devcontainers/java:1-17-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22",
+      "pnpmVersion": "none",
+      "nvmVersion": "none"
+    },
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.12"
+    }
+  },
+  "onCreateCommand": "sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq gcc g++ || true",
+  "postCreateCommand": "npm ci --prefix frontend 2>/dev/null || npm install --prefix frontend && (cd backend && mvn -B -q -DskipTests dependency:go-offline || true)",
+  "forwardPorts": [5173, 8082],
+  "portsAttributes": {
+    "5173": {
+      "label": "Frontend (Vite)",
+      "onAutoForward": "notify"
+    },
+    "8082": {
+      "label": "Backend (Spring Boot)",
+      "onAutoForward": "silent"
+    }
+  },
+  "remoteEnv": {
+    "VITE_API_BASE_URL": "http://localhost:8082/api"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "dbaeumer.vscode-eslint"
+      ],
+      "settings": {
+        "java.import.maven.enabled": true
+      }
+    }
+  }
+}

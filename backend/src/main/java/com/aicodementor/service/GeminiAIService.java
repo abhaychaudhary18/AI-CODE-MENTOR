@@ -30,7 +30,31 @@ public class GeminiAIService {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
+    private static final String MISSING_KEY_MESSAGE = """
+            ### AI Mentorship unavailable
+
+            No **GEMINI_API_KEY** is configured.
+
+            1. Create a key in [Google AI Studio](https://aistudio.google.com/apikey).
+            2. Put `GEMINI_API_KEY=your_key` in a `.env` file at the project root (same folder as `docker-compose.yml`) or export it in your shell.
+            3. Restart the backend.
+
+            _Code execution above is unaffected._
+            """;
+
+    private static final String INVALID_KEY_MESSAGE = """
+            ### Invalid Gemini API key
+
+            Google rejected the API key (**API_KEY_INVALID**). Create a new key in [Google AI Studio](https://aistudio.google.com/apikey), update `.env` or your environment, and restart the backend.
+
+            _Code execution above is unaffected._
+            """;
+
     private String callGeminiApi(String language, String code, String output, String error) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return MISSING_KEY_MESSAGE;
+        }
+
         StringBuilder promptBuilder = new StringBuilder();
         promptBuilder.append(String.format(
             "You are an expert AI coding assistant. Please analyze the following %s code.\n\nCode:\n```\n%s\n```\n\n",
@@ -112,6 +136,15 @@ public class GeminiAIService {
                        "Google's Gemini model is currently experiencing high demand.\n\n" +
                        "> Please click **Run Code** again in a few seconds.\n\n" +
                        "_The code execution above completed successfully._";
+            } else if (response.statusCode() == 400) {
+                String body = response.body();
+                System.err.println("Gemini error body: " + body);
+                if (body != null && (body.contains("API_KEY_INVALID")
+                        || body.contains("API key not valid")
+                        || body.contains("API Key not found"))) {
+                    return INVALID_KEY_MESSAGE;
+                }
+                return "AI Service Error [400]: " + (body != null ? body : "(empty body)");
             } else {
                 System.err.println("Gemini error body: " + response.body());
                 return "AI Service Error [" + response.statusCode() + "]: " + response.body();
